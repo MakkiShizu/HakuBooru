@@ -34,6 +34,7 @@ def haku_character(
     id_range_max: int,
     add_character_category_path: bool,
     export_images: bool,
+    process_threads: int,
 ) -> str:
     """Main processing function for filtering and exporting posts."""
     log_stream = StringIO()
@@ -45,7 +46,7 @@ def haku_character(
         logger.setLevel(logging.INFO)
 
         # Initialize database
-        logger.info("Loading danbooru2023.db")
+        logger.info(f"Loading {db_path}")
         load_db(db_path)
 
         # Process tags
@@ -73,6 +74,7 @@ def haku_character(
                     score_threshold=score_threshold,
                     max_posts=max_posts,
                 )
+                logger.info(f"Found tag: {len(filtered_posts)} {tag}")
                 if not filtered_posts:
                     continue
 
@@ -84,6 +86,7 @@ def haku_character(
                         output_path=output_path,
                         image_path=image_path,
                         add_category=add_character_category_path,
+                        process_threads=process_threads,
                     )
                 all_posts.extend(filtered_posts)
         else:
@@ -94,7 +97,10 @@ def haku_character(
             )
             if export_images and filtered_posts:
                 _export_posts(
-                    posts=filtered_posts, output_path=output_path, image_path=image_path
+                    posts=filtered_posts,
+                    output_path=output_path,
+                    image_path=image_path,
+                    process_threads=process_threads,
                 )
 
         return log_stream.getvalue()
@@ -174,6 +180,7 @@ def _export_posts(
     image_path: str,
     tag: Optional[str] = None,
     add_category: bool = False,
+    process_threads: int = 4,
 ) -> None:
     """Handle post export with proper path handling."""
     if add_category and tag:
@@ -187,8 +194,8 @@ def _export_posts(
         source=TarSource(image_path),
         saver=FileSaver(save_path),
         captioner=KohakuCaptioner(),
-        process_batch_size=250,
-        process_threads=4,
+        process_batch_size=max(1, len(posts) // process_threads // 2),
+        process_threads=process_threads,
     )
     exporter.export_posts(posts)
 

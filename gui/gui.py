@@ -17,6 +17,7 @@ def gradio_haku(
     id_range_max: str,
     add_character_category_path: bool,
     export_images: bool,
+    process_threads: int,
 ) -> str:
     """Wrapper function for Gradio interface."""
     try:
@@ -57,6 +58,7 @@ def gradio_haku(
             id_range_max=id_max,
             add_character_category_path=add_character_category_path,
             export_images=export_images,
+            process_threads=process_threads,
         )
     except Exception as e:
         return f"Error occurred: {str(e)}"
@@ -100,8 +102,9 @@ with gr.Blocks(title="HakuBooru GUI") as blocks:
         with gr.Row():
             id_range_min = gr.Number(value=0, label="Minimum Post ID")
             id_range_max = gr.Number(value=10_000_000, label="Maximum Post ID")
-            add_character_category_path = gr.Checkbox(label="Organize by Category")
+            add_character_category_path = gr.Checkbox(label="Organize by Tags")
             export_images = gr.Checkbox(value=True, label="Enable Export")
+            process_threads = gr.Number(value=4, label="Processing Threads")
 
     run_button = gr.Button("Start Processing", variant="primary")
     output_log = gr.Textbox(label="Processing Log", interactive=False, lines=20)
@@ -122,6 +125,7 @@ with gr.Blocks(title="HakuBooru GUI") as blocks:
             id_range_max,
             add_character_category_path,
             export_images,
+            process_threads,
         ],
         outputs=output_log,
         concurrency_limit=1,  # Prevent concurrent executions
