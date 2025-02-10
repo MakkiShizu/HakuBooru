@@ -95,6 +95,7 @@ def haku_character(
                 score_threshold=score_threshold,
                 max_posts=max_posts,
             )
+            logger.info(f"Found posts num: {len(filtered_posts)}")
             if export_images and filtered_posts:
                 _export_posts(
                     posts=filtered_posts,
@@ -159,12 +160,15 @@ def _filter_posts(
 
     # Dynamic score adjustment
     if score_threshold == -1:
-        current_score = 100
-        while current_score >= 0:
-            filtered = query.where(Post.score >= current_score)
-            if len(filtered) >= max_posts:
-                break
-            current_score -= 10
+        if max_posts > 0:
+            current_score = 100
+            while current_score >= 0:
+                filtered = query.where(Post.score >= current_score)
+                if len(filtered) >= max_posts:
+                    break
+                current_score -= 10
+        else:
+            filtered = query
     else:
         filtered = query.where(Post.score >= score_threshold)
 
@@ -189,6 +193,11 @@ def _export_posts(
         save_path = os.path.join(output_path, sub_path)
     else:
         save_path = output_path
+
+    os.makedirs(save_path, exist_ok=True)
+    txt_path = os.path.join(save_path, "ID_list.txt")
+    with open(txt_path, "w") as f:
+        f.write("\n".join(str(p.id) for p in posts))
 
     exporter = Exporter(
         source=TarSource(image_path),
