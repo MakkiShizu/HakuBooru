@@ -11,7 +11,7 @@ from hakubooru.dataset import Post
 from hakubooru.logging import logger
 
 
-file_id_regex = re.compile(r"data-(\d+)\.tar")
+file_id_regex = re.compile(r"(\d+)\.tar")
 
 
 class BaseSource:
@@ -51,7 +51,9 @@ class WdsSource(BaseSource):
                 for dir in os.listdir(os.path.join(dataset_dir, "updates")):
                     updates_dir = os.path.join(dataset_dir, "updates", dir)
                     for file in os.listdir(updates_dir):
-                        updates_file = os.path.join(updates_dir, file).replace("\\", "/")
+                        updates_file = os.path.join(updates_dir, file).replace(
+                            "\\", "/"
+                        )
                         if file.endswith(".tar"):
                             self.updates_tar[updates_file] = updates_file
         assert len(self.existed_tar), "Dataset is empty"
