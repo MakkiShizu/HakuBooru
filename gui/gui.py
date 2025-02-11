@@ -1,5 +1,6 @@
 import gradio as gr
 from gui.haku_character import haku_character
+from tag_list import generate_tag_files
 from typing import Optional
 
 
@@ -106,6 +107,16 @@ with gr.Blocks(title="HakuBooru GUI") as blocks:
             export_images = gr.Checkbox(value=True, label="Enable Export")
             process_threads = gr.Number(value=4, label="Processing Threads")
 
+    with gr.Accordion("Tag List", open=False):
+        with gr.Row():
+            tag_db_path = gr.Textbox(
+                value="./data/danbooru2023.db", label="Database Path"
+            )
+            tag_output_dir = gr.Textbox(
+                value="./out/tag_list", label="Output Directory"
+            )
+        gen_tags_btn = gr.Button("Export Tag List", variant="secondary")
+
     run_button = gr.Button("Start Processing", variant="primary")
     output_log = gr.Textbox(label="Processing Log", interactive=False, lines=20)
 
@@ -129,6 +140,13 @@ with gr.Blocks(title="HakuBooru GUI") as blocks:
         ],
         outputs=output_log,
         concurrency_limit=1,  # Prevent concurrent executions
+    )
+
+    gen_tags_btn.click(
+        generate_tag_files,
+        inputs=[tag_db_path, tag_output_dir],
+        outputs=output_log,
+        concurrency_limit=1,
     )
 
 blocks.launch(server_port=2104, inbrowser=True, show_error=True)
