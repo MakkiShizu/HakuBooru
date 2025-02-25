@@ -9,6 +9,7 @@ REM ------------------------------------------------------------------
 set EMBEDDED_PYTHON_PATH=.\python-3.10.6-embed-amd64
 set GUI_SCRIPT_PATH=update.py
 set HF_ENDPOINT=https://hf-mirror.com
+@REM set HF_HUB_ENABLE_HF_TRANSFER=1
 
 REM 检查嵌入式 Python 是否存在
 if not exist "%EMBEDDED_PYTHON_PATH%\python.exe" (
@@ -35,7 +36,9 @@ huggingface-cli login --token %HUGGINGFACE_TOKEN%
 
 REM 启动更新脚本
 echo 正在尝试更新数据库及数据集...
+:loop
 "%EMBEDDED_PYTHON_PATH%\python.exe" "%GUI_SCRIPT_PATH%"
+goto loop
 
 REM 保持窗口打开
 pause
