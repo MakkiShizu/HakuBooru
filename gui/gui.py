@@ -1,11 +1,10 @@
 import re
+import threading
 import gradio as gr
 from gui.haku_character import haku_character
 from tag_list import generate_tag_files
 from typing import Optional
-import threading
 from queue import Queue
-import uuid
 from datetime import datetime
 
 task_queue = Queue()
